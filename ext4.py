@@ -5,7 +5,7 @@ import math
 import queue
 
 
-def wcscmp(str_a, str_b):
+def wcs_cmp(str_a, str_b):
     for a, b in zip(str_a, str_b):
         tmp = ord(a) - ord(b)
         if tmp != 0:
@@ -16,10 +16,6 @@ def wcscmp(str_a, str_b):
 
 
 class Ext4Error(Exception):
-    ...
-
-
-class BlockMapError(Ext4Error):
     ...
 
 
@@ -507,10 +503,41 @@ class Volume:
     def block_size(self):
         return 1 << (10 + self.superblock.s_log_block_size)
 
+    @property
+    def get_block_count(self):
+        return self.superblock.s_blocks_count
+
+    @property
+    def get_mount_point(self):
+        return self.superblock.s_last_mounted.decode()
+
+    @property
+    def get_info_list(self):
+        data = [
+            ['Filesystem magic number', hex(self.superblock.s_magic).upper()],
+            ["Filesystem volume name", self.superblock.s_volume_name.decode()],
+            ["Filesystem UUID", self.uuid],
+            ['Last mounted on', self.superblock.s_last_mounted.decode()],
+            ["Block size", f"{1 << (10 + self.superblock.s_log_block_size)}"],
+            ["Block count", self.superblock.s_blocks_count],
+            ["Free inodes", self.superblock.s_free_inodes_count],
+            ["Free blocks", self.superblock.s_free_blocks_count],
+            ["Inodes per group", self.superblock.s_inodes_per_group],
+            ['Blocks per group', self.superblock.s_blocks_per_group],
+            ['Inode count', self.superblock.s_inodes_count],
+            ['Reserved GDT blocks', self.superblock.s_reserved_gdt_blocks],
+            ["Inode size", self.superblock.s_inode_size],
+            ['Filesystem created', self.superblock.s_mkfs_time],
+            ["Currect Size", self.get_block_count * self.block_size]
+        ]
+        return data
+
     def get_inode(self, inode_idx, file_type=InodeType.UNKNOWN):
         group_idx, inode_table_entry_idx = self.get_inode_group(inode_idx)
-
-        inode_table_offset = self.group_descriptors[group_idx].bg_inode_table * self.block_size
+        try:
+            inode_table_offset = self.group_descriptors[group_idx].bg_inode_table * self.block_size
+        except Exception:
+            inode_table_offset = 99 * self.block_size
         inode_offset = inode_table_offset + inode_table_entry_idx * self.superblock.s_inode_size
 
         return Inode(self, inode_offset, inode_idx, file_type)
@@ -559,12 +586,7 @@ class Inode:
 
     def __repr__(self):
         if self.inode_idx is not None:
-            return "{type_name:s}(inode_idx = {inode!r:s}, offset = 0x{offset:X}, volume_uuid = {uuid!r:s})".format(
-                inode=self.inode_idx,
-                offset=self.offset,
-                type_name=type(self).__name__,
-                uuid=self.volume.uuid
-            )
+            return f"{type(self).__name__:s}(inode_idx = {self.inode_idx!r:s}, offset = 0x{self.offset:X}, volume_uuid = {self.volume.uuid!r:s})"
         else:
             return f"{type(self).__name__:s}(offset = 0x{self.offset:X}, volume_uuid = {self.volume.uuid!r:s})"
 
@@ -586,7 +608,8 @@ class Inode:
         while i < len(raw_data):
             xattr_entry = ext4_xattr_entry._from_buffer_copy(raw_data, i, platform64=self.volume.platform64)
 
-            if not (xattr_entry.e_name_len | xattr_entry.e_name_index | xattr_entry.e_value_offs | xattr_entry.e_value_inum):
+            if not (
+                    xattr_entry.e_name_len | xattr_entry.e_name_index | xattr_entry.e_value_offs | xattr_entry.e_value_inum):
                 # End of ext4_xattr_entry list
                 break
 
@@ -620,8 +643,8 @@ class Inode:
         file_name_b, _, file_type_b = dir_b
 
         if file_type_a == InodeType.DIRECTORY == file_type_b or file_type_a != InodeType.DIRECTORY != file_type_b:
-            tmp = wcscmp(file_name_a.lower(), file_name_b.lower())
-            return tmp if tmp != 0 else wcscmp(file_name_a, file_name_b)
+            tmp = wcs_cmp(file_name_a.lower(), file_name_b.lower())
+            return tmp if tmp != 0 else wcs_cmp(file_name_a, file_name_b)
         else:
             return -1 if file_type_a == InodeType.DIRECTORY else 1
 
@@ -644,7 +667,8 @@ class Inode:
 
             if inode_idx is None:
                 current_path = "/".join(relative_path[:i])
-                raise FileNotFoundError(f"{part!r:s} not found in {current_path!r:s} (Inode {current_inode.inode_idx:d}).")
+                raise FileNotFoundError(
+                    f"{part!r:s} not found in {current_path!r:s} (Inode {current_inode.inode_idx:d}).")
 
             current_inode = current_inode.volume.get_inode(inode_idx, file_type)
 
@@ -799,10 +823,7 @@ class Inode:
             units = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
             unit_idx = min(int(math.log(self.inode.i_size, 1024)), len(units))
 
-            return "{size:.2f} {unit:s}".format(
-                size=self.inode.i_size / (1024 ** unit_idx),
-                unit=units[unit_idx - 1]
-            )
+            return f"{self.inode.i_size / (1024 ** unit_idx):.2f} {units[unit_idx - 1]:s}"
 
     def xattrs(self, check_inline=True, check_block=True, force_inline=False):
         # Inline xattrs
@@ -828,21 +849,18 @@ class Inode:
         if check_block and self.inode.i_file_acl != 0:
             xattrs_block_start = self.inode.i_file_acl * self.volume.block_size
             xattrs_block = self.volume.read(xattrs_block_start, self.volume.block_size)
+            if xattrs_block:
+                xattrs_header = ext4_xattr_header.from_buffer_copy(xattrs_block)
+                if not self.volume.ignore_magic and xattrs_header.h_magic != 0xEA020000:
+                    # Perhaps you think this code is a bit foolish, but that's all others can do
+                    print(f"Invalid magic value in xattrs block header at offset 0x{xattrs_block_start:X} of "
+                          f"inode {self.inode_idx:d}: 0x{xattrs_header.h_magic} (expected 0xEA020000)")
+                    return '', ''
 
-            xattrs_header = ext4_xattr_header.from_buffer_copy(xattrs_block)
-            if not self.volume.ignore_magic and xattrs_header.h_magic != 0xEA020000:
-                try:
-                    raise MagicError(
-                        f"Invalid magic value in xattrs block header at offset 0x{xattrs_block_start:X} of "
-                        f"inode {self.inode_idx:d}: 0x{xattrs_header.h_magic} (expected 0xEA020000)"
-                    )
-                except BaseException and Exception:
-                    ...
-
-            if xattrs_header.h_blocks != 1:
-                raise Ext4Error(
-                    f"Invalid number of xattr blocks at offset 0x{xattrs_block_start:X} "
-                    f"of inode {self.inode_idx:d}: {xattrs_header.h_blocks:d} (expected 1)")
+                if xattrs_header.h_blocks != 1:
+                    print(f"Invalid number of xattr blocks at offset 0x{xattrs_block_start:X} "
+                          f"of inode {self.inode_idx:d}: {xattrs_header.h_blocks:d} (expected 1)")
+                    return '', ''
 
             offset = 4 * ((ctypes.sizeof(
                 ext4_xattr_header) + 3) // 4)

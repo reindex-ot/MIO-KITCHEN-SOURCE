@@ -1,17 +1,17 @@
 import errno
 import os
-import sys
 import struct
+import sys
 import tempfile
-from os.path import exists
 from os import getcwd
-from lpunpack import SparseImage
+from os.path import exists
+from random import randint, choice
+from threading import Thread
+
 import blockimgdiff
 import sparse_img
-from threading import Thread
-from random import randint, choice
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
+from lpunpack import SparseImage
+
 DataImage = blockimgdiff.DataImage
 
 # -----
@@ -28,8 +28,10 @@ try:
     sys.set_int_max_str_digits(0)
 except AttributeError:
     ...
-
-elocal = getcwd()
+if os.name == 'nt':
+    e_local = getcwd()
+else:
+    e_local = os.path.normpath(os.path.dirname(sys.argv[0]))
 dn = None
 formats = ([b'PK', "zip"], [b'OPPOENCRYPT!', "ozip"], [b'7z', "7z"], [b'\x53\xef', 'ext', 1080],
            [b'\x3a\xff\x26\xed', "sparse"], [b'\xe2\xe1\xf5\xe0', "erofs", 1024], [b"CrAU", "payload"],
@@ -46,21 +48,6 @@ formats = ([b'PK', "zip"], [b'OPPOENCRYPT!', "ozip"], [b'7z', "7z"], [b'\x53\xef
 
 
 # ----DEFS
-class aesencrypt:
-    @staticmethod
-    def encrypt(key, file_path, outfile):
-        cipher = AES.new(key.encode("utf-8"), AES.MODE_ECB)
-        with open(outfile, "wb") as f, open(file_path, 'rb') as fd:
-            f.write(cipher.encrypt(pad(fd.read(), AES.block_size)))
-
-    @staticmethod
-    def decrypt(key, file_path, outfile):
-        cipher = AES.new(key.encode("utf-8"), AES.MODE_ECB)
-        with open(file_path, "rb") as f:
-            data = cipher.decrypt(f.read())
-        data = data[:-data[-1]]
-        with open(outfile, "wb") as f:
-            f.write(data)
 
 
 class sdat2img:
@@ -74,18 +61,13 @@ class sdat2img:
         version = next(self.list_file)
         self.version = str(version)
         next(self.list_file)
-        show = "Android {} detected!\n"
-        if version == 1:
-            print(show.format("Lollipop 5.0"))
-        elif version == 2:
-            print(show.format("Lollipop 5.1"))
-        elif version == 3:
-            print(show.format("Marshmallow 6.x"))
-        elif version == 4:
-            print(show.format("Nougat 7.x / Oreo 8.x / Pie 9.x"))
-        else:
-            print(show.format('Unknown Android version {version}!\n'))
-
+        versions = {
+            1: "Lollipop 5.0",
+            2: "Lollipop 5.1",
+            3: "Marshmallow 6.x",
+            4: "Nougat 7.x / Oreo 8.x / Pie 9.x",
+        }
+        print("Android {} detected!\n".format(versions.get(version, f'Unknown Android version {version}!\n')))
         # Don't clobber existing files to avoid accidental data loss
         try:
             output_img = open(self.OUTPUT_IMAGE_FILE, 'wb')
@@ -151,9 +133,12 @@ class sdat2img:
             for line in trans_list:
                 line = line.split(' ')
                 cmd = line[0]
-                if cmd in ['erase', 'new', 'zero']:
+                if cmd == 'new':
+                    # if cmd in ['erase', 'new', 'zero']:
                     yield [cmd, self.rangeset(line[1])]
                 else:
+                    if cmd in ['erase', 'new', 'zero']:
+                        continue
                     # Skip lines starting with numbers, they are not commands anyway
                     if not cmd[0].isdigit():
                         print('Command "{}" is not valid.'.format(cmd))
@@ -198,13 +183,13 @@ def gettype(file) -> str:
             if compare(f_[0], f_[2]):
                 return f_[1]
     try:
-        if LOGODUMPER(file, str(None)).chkimg(file):
+        if LOGO_DUMPER(file, str(None)).check_img(file):
             return 'logo'
     except AssertionError:
         ...
     except struct.error:
         ...
-    return "unknow"
+    return "unknown"
 
 
 def dynamic_list_reader(path):
@@ -288,7 +273,7 @@ def simg2img(path):
     with open(path, 'rb') as fd:
         if SparseImage(fd).check():
             print('Sparse image detected.')
-            print('Process conversion to non sparse image...')
+            print('Converting to raw image...')
             unsparse_file = SparseImage(fd).unsparse()
             print('Result:[ok]')
         else:
@@ -305,11 +290,11 @@ def img2sdat(input_image, out_dir='.', version=None, prefix='system'):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
     versions = {
-            1: "Android Lollipop 5.0",
-            2: "Android Lollipop 5.1",
-            3: "Android Marshmallow 6.0",
-            4: "Android Nougat 7.0/7.1/8.0/8.1"}
-    print("Img2sdat(1.7):"+versions[version])
+        1: "Android Lollipop 5.0",
+        2: "Android Lollipop 5.1",
+        3: "Android Marshmallow 6.0",
+        4: "Android Nougat 7.0/7.1/8.0/8.1"}
+    print("Img2sdat(1.7):" + versions[version])
     blockimgdiff.BlockImageDiff(sparse_img.SparseImage(input_image, tempfile.mkstemp()[1], '0'), None, version).Compute(
         out_dir + '/' + prefix)
 
@@ -321,8 +306,6 @@ def findfile(file, dir_) -> str:
                 return (root + os.sep + file).replace("\\", '/')
             else:
                 return root + os.sep + file
-        else:
-            ...
 
 
 def findfolder(dir__, folder_name):
@@ -333,45 +316,31 @@ def findfolder(dir__, folder_name):
     return None
 
 
+def jzxs(master):
+    master.geometry('+{}+{}'.format(int(master.winfo_screenwidth() / 2 - master.winfo_width() / 2),
+                                    int(master.winfo_screenheight() / 2 - master.winfo_height() / 2)))
+    try:
+        master.update()
+    except (Exception, BaseException):
+        ...
+
+
 # ----CLASSES
-class jzxs(object):
-    def __init__(self, master):
-        self.master = master
-        self.set()
-
-    def set(self):
-        self.master.geometry('+{}+{}'.format(int(self.master.winfo_screenwidth() / 2 - self.master.winfo_width() / 2),
-                                             int(self.master.winfo_screenheight() / 2 - self.master.winfo_height() / 2)))
-
 
 class vbpatch:
+    magic = b'AVB0'
+
     def __init__(self, file_):
         self.file = file_
+        self.restore = lambda: self.patchvb(b'\x00')
+        self.disdm = lambda: self.patchvb(b'\x01')
+        self.disavb = lambda: self.patchvb(b'\x02')
 
     def checkmagic(self):
         if os.access(self.file, os.F_OK):
-            magic = b'AVB0'
             with open(self.file, "rb") as f:
                 buf = f.read(4)
-                return magic == buf
-        else:
-            print("File dose not exist!")
-
-    def readflag(self):
-        if not self.checkmagic():
-            return False
-        if os.access(self.file, os.F_OK):
-            with open(self.file, "rb") as f:
-                f.seek(123, 0)
-                flag = f.read(1)
-                if flag == b'\x00':
-                    return 0  # Verify boot and dm-verity is on
-                elif flag == b'\x01':
-                    return 1  # Verify boot but dm-verity is off
-                elif flag == b'\x02':
-                    return 2  # All verity is off
-                else:
-                    return flag
+                return self.magic == buf
         else:
             print("File does not exist!")
 
@@ -386,15 +355,6 @@ class vbpatch:
         else:
             print("File not Found")
 
-    def restore(self):
-        self.patchvb(b'\x00')
-
-    def disdm(self):
-        self.patchvb(b'\x01')
-
-    def disavb(self):
-        self.patchvb(b'\x02')
-
 
 class DUMPCFG:
     blksz = 0x1 << 0xc
@@ -405,9 +365,9 @@ class DUMPCFG:
     imgblkszs = []
 
 
-class BMPHEAD(object):
+class BMPHEAD:
     def __init__(self, buf: bytes = None):  # Read bytes buf and use this struct to parse
-        assert buf is not None, f"buf Should be bytes not {type(buf)}"
+        assert buf is not None, f"buf Should be bytes, not {type(buf)}"
         # print(buf)
         self.structstr = "<H6I"
         (
@@ -421,37 +381,37 @@ class BMPHEAD(object):
         ) = struct.unpack(self.structstr, buf)
 
 
-class XIAOMI_BLKSTRUCT(object):
+class XIAOMI_BLKSTRUCT:
     def __init__(self, buf: bytes):
         self.structstr = "2I"
         (
-            self.imgoff,
+            self.img_offset,
             self.blksz,
         ) = struct.unpack(self.structstr, buf)
 
 
-class LOGODUMPER(object):
+class LOGO_DUMPER:
     def __init__(self, img: str, out: str, dir__: str = "pic"):
         self.magic = None
         self.out = out
         self.img = img
         self.dir = dir__
-        self.structstr = "<8s"
+        self.struct_str = "<8s"
         self.cfg = DUMPCFG()
-        self.chkimg(img)
+        self.check_img(img)
 
-    def chkimg(self, img: str):
-        assert os.access(img, os.F_OK), f"{img} does not found!"
+    def check_img(self, img: str):
+        assert os.access(img, os.F_OK), f"{img} does not exist!"
         with open(img, 'rb') as f:
             f.seek(self.cfg.headoff, 0)
             self.magic = struct.unpack(
-                self.structstr, f.read(struct.calcsize(self.structstr))
+                self.struct_str, f.read(struct.calcsize(self.struct_str))
             )[0]
             while True:
                 m = XIAOMI_BLKSTRUCT(f.read(8))
-                if m.imgoff != 0:
+                if m.img_offset != 0:
                     self.cfg.imgblkszs.append(m.blksz << 0xc)
-                    self.cfg.imgblkoffs.append(m.imgoff << 0xc)
+                    self.cfg.imgblkoffs.append(m.img_offset << 0xc)
                     self.cfg.imgnum += 1
                 else:
                     break
@@ -464,11 +424,11 @@ class LOGODUMPER(object):
                   "BMP\tSize\tWidth\tHeight")
             for i in range(self.cfg.imgnum):
                 f.seek(self.cfg.imgblkoffs[i], 0)
-                bmph = BMPHEAD(f.read(26))
+                bmp_h = BMPHEAD(f.read(26))
                 f.seek(self.cfg.imgblkoffs[i], 0)
-                print("%d\t%d\t%d\t%d" % (i, bmph.fsize, bmph.width, bmph.height))
+                print("%d\t%d\t%d\t%d" % (i, bmp_h.fsize, bmp_h.width, bmp_h.height))
                 with open(os.path.join(self.out, "%d.bmp" % i), 'wb') as o:
-                    o.write(f.read(bmph.fsize))
+                    o.write(f.read(bmp_h.fsize))
             print("\tDone!")
 
     def repack(self):
@@ -477,13 +437,13 @@ class LOGODUMPER(object):
             for i in range(self.cfg.imgnum):
                 print("Write BMP [%d.bmp] at offset 0x%X" % (i, off << 0xc))
                 with open(os.path.join(self.dir, "%d.bmp" % i), 'rb') as b:
-                    bhead = BMPHEAD(b.read(26))
+                    bmp_head = BMPHEAD(b.read(26))
                     b.seek(0, 0)
-                    self.cfg.imgblkszs[i] = (bhead.fsize >> 0xc) + 1
+                    self.cfg.imgblkszs[i] = (bmp_head.fsize >> 0xc) + 1
                     self.cfg.imgblkoffs[i] = off
 
                     o.seek(off << 0xc)
-                    o.write(b.read(bhead.fsize))
+                    o.write(b.read(bmp_head.fsize))
 
                     off += self.cfg.imgblkszs[i]
             o.seek(self.cfg.headoff)

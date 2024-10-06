@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import shutil
 import zipfile
@@ -54,6 +55,8 @@ if ostype == 'Darwin':
         'icon.ico',
         '--collect-data',
         'sv_ttk',
+        '--collect-data',
+        'chlorophyll',
         '--hidden-import',
         'tkinter',
         '--hidden-import',
@@ -71,6 +74,8 @@ elif os.name == 'posix':
         'icon.ico',
         '--collect-data',
         'sv_ttk',
+        '--collect-data',
+        'chlorophyll',
         '--hidden-import',
         'tkinter',
         '--hidden-import',
@@ -90,6 +95,8 @@ elif os.name == 'nt':
         'icon.ico',
         '--collect-data',
         'sv_ttk',
+        '--collect-data',
+        'chlorophyll',
         '--splash',
         'splash.png'
     ])

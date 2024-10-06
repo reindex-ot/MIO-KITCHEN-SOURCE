@@ -5,5 +5,8 @@ Requests==2.31.0
 sv_ttk
 windnd
 pyinstaller
-lark
+chlorophyll
 pyyaml
+future
+pip
+Pygments

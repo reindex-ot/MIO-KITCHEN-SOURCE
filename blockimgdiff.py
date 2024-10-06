@@ -54,7 +54,7 @@ def compute_patch(src, tgt, imgdiff=False):
         try:
             os.unlink(patchfile)
         except OSError:
-            ...
+            pass
         if imgdiff:
             p = call(["imgdiff", "-z", srcfile, tgtfile, patchfile],
                      stdout=open("/dev/null", "a"),
@@ -73,7 +73,7 @@ def compute_patch(src, tgt, imgdiff=False):
             os.unlink(tgtfile)
             os.unlink(patchfile)
         except OSError:
-            ...
+            pass
 
 
 class Image(object):
@@ -340,8 +340,7 @@ class BlockImageDiff(object):
         self.ComputePatches(prefix)
         self.WriteTransfers(prefix)
 
-    @staticmethod
-    def HashBlocks(source, ranges):  # pylint: disable=no-self-use
+    def HashBlocks(self, source, ranges):  # pylint: disable=no-self-use
         data = source.ReadRangeSet(ranges)
         ctx = sha1()
 
@@ -704,7 +703,7 @@ class BlockImageDiff(object):
         with open(prefix + ".new.dat", "wb") as new_f:
             for xf in self.transfers:
                 if xf.style == "zero":
-                    ...
+                    pass
                 elif xf.style == "new":
                     for piece in self.tgt.ReadRangeSet(xf.tgt_ranges):
                         new_f.write(piece)
