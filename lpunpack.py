@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 import argparse
 import copy
 import enum
@@ -134,7 +135,7 @@ class ShowJsonInfo(json.JSONEncoder):
         return super().encode(result)
 
 
-class SparseHeader(object):
+class SparseHeader:
     def __init__(self, buffer):
         fmt = '<I4H4I'
         (
@@ -150,7 +151,7 @@ class SparseHeader(object):
         ) = struct.unpack(fmt, buffer[0:struct.calcsize(fmt)])
 
 
-class SparseChunkHeader(object):
+class SparseChunkHeader:
     """
         Following a Raw or Fill or CRC32 chunk is data.
         For a Raw chunk, it's the data in chunk_sz * blk_sz.
@@ -561,32 +562,23 @@ class Metadata:
         layouts = "\n".join(data["partition_layout"])
         partitions = "------------------------\n".join(
             [
-                "  Name: {}\n  Group: {}\n  Attributes: {}\n  Extents:\n    {}\n".format(
-                    item["name"],
-                    item["group_name"],
-                    item["attributes"],
-                    "\n".join(item["extents"])
-                ) for item in data["partition_table"]
+                "  Name: {}\n  Group: {}\n  Attributes: {}\n  Extents:\n    {}\n".format(item["name"],
+                                                                                         item["group_name"],
+                                                                                         item["attributes"],
+                                                                                         "\n".join(item["extents"])) for
+                item in data["partition_table"]
             ]
         )[:-1]
         blocks = "\n".join(
             [
-                "  Partition name: {}\n  First sector: {}\n  Size: {} bytes\n  Flags: {}".format(
-                    item["name"],
-                    item["first_sector"],
-                    item["size"],
-                    item["flags"]
-                )
+                f"  Partition name: {item['name']}\n  First sector: {item['first_sector']}\n  Size: {item['size']} bytes\n  Flags: {item['flags']}"
                 for item in data["block_devices"]
             ]
         )
         groups = "------------------------\n".join(
             [
-                "  Name: {}\n  Maximum size: {} bytes\n  Flags: {}\n".format(
-                    item["name"],
-                    item["maximum_size"],
-                    item["flags"]
-                ) for item in data["group_table"]
+                f"  Name: {item['name']}\n  Maximum size: {item['maximum_size']} bytes\n  Flags: {item['flags']}\n" for
+                item in data["group_table"]
             ]
         )[:-1]
         return template.substitute(partitions=partitions, layouts=layouts, blocks=blocks, groups=groups, **data)
@@ -634,7 +626,7 @@ class SparseImage:
         self._fd.seek(self.header.file_hdr_sz - SPARSE_HEADER_SIZE, 1)
         unsparse_file_dir = os.path.dirname(self._fd.name)
         unsparse_file = os.path.join(unsparse_file_dir,
-                                     "{}.unsparse.img".format(os.path.splitext(os.path.basename(self._fd.name))[0]))
+                                     f"{os.path.splitext(os.path.basename(self._fd.name))[0]}.unsparse.img")
         with open(str(unsparse_file), 'wb') as out:
             sector_base = 82528
             output_len = 0
@@ -649,24 +641,25 @@ class SparseImage:
                         out.write(data)
                         output_len += len_data
                         sector_base += sector_size
+                elif chunk_header.chunk_type == 0xCAC2:
+                    data = self._read_data(chunk_data_size)
+                    len_data = sector_size << 9
+                    out.truncate(out.tell() + len_data)
+                    out.seek(0, 2)
+                    output_len += len(data)
+                    sector_base += sector_size
+                elif chunk_header.chunk_type == 0xCAC3:
+                    data = self._read_data(chunk_data_size)
+                    len_data = sector_size << 9
+                    out.truncate(out.tell() + len_data)
+                    out.seek(0, 2)
+                    output_len += len(data)
+                    sector_base += sector_size
                 else:
-                    if chunk_header.chunk_type == 0xCAC2:
-                        data = self._read_data(chunk_data_size)
-                        len_data = sector_size << 9
-                        out.write(struct.pack("B", 0) * len_data)
-                        output_len += len(data)
-                        sector_base += sector_size
-                    else:
-                        if chunk_header.chunk_type == 0xCAC3:
-                            data = self._read_data(chunk_data_size)
-                            len_data = sector_size << 9
-                            out.write(struct.pack("B", 0) * len_data)
-                            output_len += len(data)
-                            sector_base += sector_size
-                        else:
-                            len_data = sector_size << 9
-                            out.write(struct.pack("B", 0) * len_data)
-                            sector_base += sector_size
+                    len_data = sector_size << 9
+                    out.truncate(out.tell() + len_data)
+                    out.seek(0, 2)
+                    sector_base += sector_size
                 chunks -= 1
         return unsparse_file
 
@@ -674,7 +667,7 @@ class SparseImage:
 T = TypeVar('T')
 
 
-class LpUnpack(object):
+class LpUnpack:
     def __init__(self, **kwargs):
         self._partition_name = kwargs.get('NAME')
         self._show_info = kwargs.get('SHOW_INFO', True)
@@ -701,7 +694,7 @@ class LpUnpack(object):
                 offset, size = part
                 self._write_extent_to_file(out, offset, size, unpack_job.geometry.logical_block_size)
 
-        print('Done:[%s]' % (dti() - start))
+        print(f'Done:[{dti() - start}]')
 
     def _extract(self, partition, metadata):
         unpack_job = UnpackJob(name=partition.name, geometry=metadata.geometry)
@@ -835,7 +828,7 @@ class LpUnpack(object):
             metadata = self._read_metadata()
 
             filter_partition = []
-            for index, partition in enumerate(metadata.partitions):
+            for partition in metadata.partitions:
                 filter_partition.append(partition.name)
 
             if not filter_partition:
@@ -865,7 +858,7 @@ class LpUnpack(object):
 
             if self._partition_name:
                 filter_partition = []
-                for index, partition in enumerate(metadata.partitions):
+                for partition in metadata.partitions:
                     if partition.name in self._partition_name:
                         filter_partition.append(partition)
 
@@ -885,7 +878,7 @@ class LpUnpack(object):
                     print(f"{metadata.to_json()}\n")
 
             if not self._show_info and self._out_dir is None:
-                raise LpUnpackError(message=f'Not specified directory for extraction')
+                raise LpUnpackError(message='Not specified directory for extraction')
 
             if self._out_dir:
                 for partition in metadata.partitions:
@@ -902,7 +895,7 @@ class LpUnpack(object):
 def unpack(file: str, out: str, parts: list = None):
     namespace = argparse.Namespace(SUPER_IMAGE=file, OUTPUT_DIR=out, SHOW_INFO=False, NAME=parts)
     if not os.path.exists(namespace.SUPER_IMAGE):
-        raise FileNotFoundError("%s Cannot Find" % namespace.SUPER_IMAGE)
+        raise FileNotFoundError(f"{namespace.SUPER_IMAGE} Cannot Find")
     else:
         LpUnpack(**vars(namespace)).unpack()
 
@@ -910,6 +903,6 @@ def unpack(file: str, out: str, parts: list = None):
 def get_parts(file_):
     namespace = argparse.Namespace(SUPER_IMAGE=file_, SHOW_INFO=False)
     if not os.path.exists(namespace.SUPER_IMAGE):
-        raise FileNotFoundError("%s Cannot Find" % namespace.SUPER_IMAGE)
+        raise FileNotFoundError(f"{namespace.SUPER_IMAGE} Cannot Find")
     else:
         return LpUnpack(**vars(namespace)).get_info()

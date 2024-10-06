@@ -1,9 +1,21 @@
+# Copyright (C) 2024 The MIO-KITCHEN-SOURCE Project
+#
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.gnu.org/licenses/agpl-3.0.en.html#license-text
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 import re
-
+from posix import symlink
 import contextpatch
 import fspatch
-from posix import symlink
 
 
 class updaterutil:
@@ -76,8 +88,8 @@ def script2fs_context(input_f, outdir, project):
     print("生成fs_config 和 file_contexts")
     fs_label.sort()
     fc_label.sort()
-    with open(os.path.join(outdir, "system_fs_config"), 'w', newline='\n') as fs_config, open(
-            os.path.join(outdir, "system_file_contexts"), 'w', newline='\n') as file_contexts:
+    with open(os.path.join(outdir, "system_fs_config"), 'w', newline='\n', encoding='utf-8') as fs_config, open(
+            os.path.join(outdir, "system_file_contexts"), 'w', newline='\n', encoding='utf-8') as file_contexts:
         for fs in fs_label:
             fs_config.write(" ".join(fs) + '\n')
         for fc in fc_label:

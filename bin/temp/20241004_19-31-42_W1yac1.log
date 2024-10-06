@@ -1,0 +1,4 @@
+DEBUG:2024-10-04 19:31:42,496:PngImagePlugin.py:PIL.PngImagePlugin:STREAM b'IHDR' 16 13
+DEBUG:2024-10-04 19:31:42,496:PngImagePlugin.py:PIL.PngImagePlugin:STREAM b'pHYs' 41 9
+DEBUG:2024-10-04 19:31:42,496:PngImagePlugin.py:PIL.PngImagePlugin:STREAM b'cHRM' 62 32
+DEBUG:2024-10-04 19:31:42,496:PngImagePlugin.py:PIL.PngImagePlugin:STREAM b'IDAT' 106 750871

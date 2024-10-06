@@ -1,7 +1,8 @@
+# pylint: disable=line-too-long
 import ctypes
-import functools
+from functools import cmp_to_key
 import io
-import math
+from math import log as log_math
 import queue
 
 
@@ -513,12 +514,12 @@ class Volume:
 
     @property
     def get_info_list(self):
-        data = [
-            ['Filesystem magic number', hex(self.superblock.s_magic).upper()],
-            ["Filesystem volume name", self.superblock.s_volume_name.decode()],
-            ["Filesystem UUID", self.uuid],
+        return [
+            ['Magic number', hex(self.superblock.s_magic).upper()],
+            ["Volume name", self.superblock.s_volume_name.decode()],
+            ["UUID", self.uuid],
             ['Last mounted on', self.superblock.s_last_mounted.decode()],
-            ["Block size", f"{1 << (10 + self.superblock.s_log_block_size)}"],
+            ["Block size", 1 << (10 + self.superblock.s_log_block_size)],
             ["Block count", self.superblock.s_blocks_count],
             ["Free inodes", self.superblock.s_free_inodes_count],
             ["Free blocks", self.superblock.s_free_blocks_count],
@@ -528,9 +529,7 @@ class Volume:
             ['Reserved GDT blocks', self.superblock.s_reserved_gdt_blocks],
             ["Inode size", self.superblock.s_inode_size],
             ['Filesystem created', self.superblock.s_mkfs_time],
-            ["Currect Size", self.get_block_count * self.block_size]
-        ]
-        return data
+            ["Current Size", self.get_block_count * self.block_size]]
 
     def get_inode(self, inode_idx, file_type=InodeType.UNKNOWN):
         group_idx, inode_table_entry_idx = self.get_inode_group(inode_idx)
@@ -569,7 +568,7 @@ class Volume:
     def uuid(self):
         uuid = self.superblock.s_uuid
         uuid = [uuid[:4], uuid[4: 6], uuid[6: 8], uuid[8: 10], uuid[10:]]
-        return "-".join("".join("{0:02X}".format(c) for c in part) for part in uuid)
+        return "-".join("".join(f"{c:02X}" for c in part) for part in uuid)
 
 
 class Inode:
@@ -648,7 +647,7 @@ class Inode:
         else:
             return -1 if file_type_a == InodeType.DIRECTORY else 1
 
-    directory_entry_key = functools.cmp_to_key(directory_entry_comparator)
+    directory_entry_key = cmp_to_key(directory_entry_comparator)
 
     def get_inode(self, *relative_path, decode_name=None):
         if not self.is_dir:
@@ -818,10 +817,10 @@ class Inode:
     @property
     def size_readable(self):
         if self.inode.i_size < 1024:
-            return "{0:d} bytes".format(self.inode.i_size) if self.inode.i_size != 1 else "1 byte"
+            return f"{self.inode.i_size:d} bytes" if self.inode.i_size != 1 else "1 byte"
         else:
             units = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
-            unit_idx = min(int(math.log(self.inode.i_size, 1024)), len(units))
+            unit_idx = min(int(log_math(self.inode.i_size, 1024)), len(units))
 
             return f"{self.inode.i_size / (1024 ** unit_idx):.2f} {units[unit_idx - 1]:s}"
 
@@ -928,8 +927,7 @@ class BlockReader:
 
         # Check read
         if len(result) != end_of_stream_check:
-            raise EndOfStreamError(
-                "The volume's underlying stream ended {0:d} bytes before EOF.".format(byte_len - len(result)))
+            raise EndOfStreamError(f"The volume's underlying stream ended {byte_len - len(result):d} bytes before EOF.")
 
         self.cursor += len(result)
         return result

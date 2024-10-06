@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import bisect
 import os
-import sys
 import struct
-from hashlib import sha1
+import sys
+from bisect import bisect_right
 
 import rangelib
 
 
-class SparseImage(object):
+class SparseImage:
     """Wraps a sparse image file into an image object.
 
   Wraps a sparse image file (and optional file map and clobbered_blocks) into
@@ -49,19 +48,15 @@ class SparseImage(object):
         self.total_chunks = total_chunks = header[7]
 
         if magic != 0xED26FF3A:
-            raise ValueError("Magic should be 0xED26FF3A but is 0x%08X" % (magic,))
+            raise ValueError(f"Magic should be 0xED26FF3A but is 0x{magic:08X}")
         if major_version != 1 or minor_version != 0:
-            raise ValueError("I know about version 1.0, but this is version %u.%u" %
-                             (major_version, minor_version))
+            raise ValueError(f"I know about version 1.0, but this is version {major_version:d}.{minor_version:d}")
         if file_hdr_sz != 28:
-            raise ValueError("File header size was expected to be 28, but is %u." %
-                             (file_hdr_sz,))
+            raise ValueError(f"File header size was expected to be 28, but is {file_hdr_sz:d}.")
         if chunk_hdr_sz != 12:
-            raise ValueError("Chunk header size was expected to be 12, but is %u." %
-                             (chunk_hdr_sz,))
+            raise ValueError(f"Chunk header size was expected to be 12, but is {chunk_hdr_sz:d}.")
 
-        print("Total of %u %u-byte output blocks in %u input chunks."
-              % (total_blks, blk_sz, total_chunks))
+        print(f"Total of {total_blks:d} {blk_sz:d}-byte output blocks in {total_chunks:d} input chunks.")
 
         if not build_map:
             return
@@ -82,8 +77,7 @@ class SparseImage(object):
             if chunk_type == 0xCAC1:
                 if data_sz != (chunk_sz * blk_sz):
                     raise ValueError(
-                        "Raw chunk input size (%u) does not match output size (%u)" %
-                        (data_sz, chunk_sz * blk_sz))
+                        f"Raw chunk input size ({data_sz:d}) does not match output size ({chunk_sz * blk_sz:d})")
                 else:
                     care_data.append(pos)
                     care_data.append(pos + chunk_sz)
@@ -100,8 +94,7 @@ class SparseImage(object):
 
             elif chunk_type == 0xCAC3:
                 if data_sz != 0:
-                    raise ValueError("Don't care chunk input size is non-zero (%u)" %
-                                     data_sz)
+                    raise ValueError(f"Don't care chunk input size is non-zero ({data_sz:d})")
                 else:
                     pos += chunk_sz
 
@@ -109,8 +102,7 @@ class SparseImage(object):
                 raise ValueError("CRC32 chunks are not supported")
 
             else:
-                raise ValueError("Unknown chunk type 0x%04X not supported" %
-                                 (chunk_type,))
+                raise ValueError(f"Unknown chunk type 0x{chunk_type:04X} not supported")
 
         self.care_map = rangelib.RangeSet(care_data)
         self.offset_index = [i[0] for i in offset_map]
@@ -131,39 +123,12 @@ class SparseImage(object):
         else:
             self.file_map = {"__DATA": self.care_map}
 
-    def AppendFillChunk(self, data, blocks):
-        f = self.simg_f
-
-        # Append a fill chunk
-        f.seek(0, os.SEEK_END)
-        f.write(struct.pack("<2H3I", 0xCAC2, 0, blocks, 16, data))
-
-        # Update the sparse header
-        self.total_blocks += blocks
-        self.total_chunks += 1
-
-        f.seek(16, os.SEEK_SET)
-        f.write(struct.pack("<2I", self.total_blocks, self.total_chunks))
-
     def ReadRangeSet(self, ranges):
-        return [d for d in self._GetRangeData(ranges)]
-
-    def TotalSha1(self, include_clobbered_blocks=False):
-        """Return the SHA-1 hash of all data in the 'care' regions.
-
-    If include_clobbered_blocks is True, it returns the hash including the
-    clobbered_blocks."""
-        ranges = self.care_map
-        if not include_clobbered_blocks:
-            ranges = ranges.subtract(self.clobbered_blocks)
-        h = sha1()
-        for d in self._GetRangeData(ranges):
-            h.update(d)
-        return h.hexdigest()
+        yield from self._GetRangeData(ranges)
 
     def _GetRangeData(self, ranges):
         """Generator that produces all the image data in 'ranges'.  The
-    number of individual pieces returned is arbitrary (and in
+    number of individual pieces returned is arbitrary and in
     particular is not necessarily equal to the number of ranges in
     'ranges'.
 
@@ -174,7 +139,7 @@ class SparseImage(object):
         f = self.simg_f
         for s, e in ranges:
             to_read = e - s
-            idx = bisect.bisect_right(self.offset_index, s) - 1
+            idx = bisect_right(self.offset_index, s) - 1
             chunk_start, chunk_len, filepos, fill_data = self.offset_map[idx]
 
             # for the first chunk we may be starting partway through it.
@@ -245,7 +210,7 @@ class SparseImage(object):
         f = self.simg_f
         for s, e in remaining:
             for b in range(s, e):
-                idx = bisect.bisect_right(self.offset_index, b) - 1
+                idx = bisect_right(self.offset_index, b) - 1
                 chunk_start, _, filepos, fill_data = self.offset_map[idx]
                 if filepos is not None:
                     filepos += (b - chunk_start) * self.blocksize
@@ -279,11 +244,6 @@ class SparseImage(object):
             out["__ZERO"] = rangelib.RangeSet(data=zero_blocks)
         if nonzero_groups:
             for i, blocks in enumerate(nonzero_groups):
-                out["__NONZERO-%d" % i] = rangelib.RangeSet(data=blocks)
+                out[f"__NONZERO-{i:d}"] = rangelib.RangeSet(data=blocks)
         if clobbered_blocks:
             out["__COPY"] = clobbered_blocks
-
-    def ResetFileMap(self):
-        """Throw away the file map and treat the entire image as
-    undifferentiated data."""
-        self.file_map = {"__DATA": self.care_map}

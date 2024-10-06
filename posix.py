@@ -1,5 +1,17 @@
 import os
-
+# Copyright (C) 2024 The MIO-KITCHEN-SOURCE Project
+#
+# Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.gnu.org/licenses/agpl-3.0.en.html#license-text
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 if os.name == 'nt':
     from ctypes.wintypes import LPCSTR, DWORD
     from stat import FILE_ATTRIBUTE_SYSTEM
@@ -7,6 +19,8 @@ if os.name == 'nt':
 
 
 def symlink(link_target, target):
+    if not os.path.exists(os.path.dirname(target)):
+        os.makedirs(os.path.dirname(target) ,exist_ok=True)
     if os.name == 'posix':
         os.symlink(link_target, target)
     elif os.name == 'nt':
@@ -16,7 +30,7 @@ def symlink(link_target, target):
                 windll.kernel32.SetFileAttributesA(LPCSTR(target.encode()),
                                                    DWORD(FILE_ATTRIBUTE_SYSTEM))
             except Exception as e:
-                print(e.__str__())
+                print(str(e))
 
 
 def readlink(path):
@@ -32,8 +46,4 @@ def readlink(path):
             return os.readlink(path)
         else:
             return ''
-
-
-if os.name == 'nt':
-    # TODO: Add Case Sensitive
-    pass
+    return ''

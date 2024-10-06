@@ -2,6 +2,9 @@
 ![Banner](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/a9bcfdf613ad28e82f7899e3d420d76ecfea174c/splash.png)
 #### 一款Python编写的Rom工具
 ***
+> [!CAUTION]
+> 此项目非发布在gitcode， 如果您在gitcode发现此项目，请联系我们并保留截图证据
+***
 ## 此工具使用了许多开源项目， 向开发者们致敬!
 ***
 ## 国际化
@@ -9,8 +12,8 @@
 ### 英语: [en-US](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README.md)
 ***
 ## 功能
-* 解包 boot dtbo ext4 erofs payload logo 之类
-* 打包 boot dtbo ext4 erofs payload logo 之类
+* 解包 `boot dtbo ext4 erofs payload logo` 之类
+* 打包 `boot dtbo ext4 erofs payload logo` 之类
 ***
 ## 优势
 * 自动Fs和Context修补
@@ -21,13 +24,7 @@
 * 支持安卓8以下ROM打IMG
 * 在LINUX上使用MKC_文件选择，更易用
 ***
-## * macOS 注意！
-``` shell
-# 如果你想使用 [brotli],你需要:
-# 可能系统自带, 请先检查
-# 
-brew install gettext
-```
+
 ## 开始使用
 ### 必要准备
 <details><summary>macOS</summary>
@@ -70,8 +67,8 @@ python build.py
 ***
 ### 开发者邮箱: 3590361911@qq.com
 ### QQ 群: 836898509
-### TG 群: [Mio Android Kitchen Chat](https://t.me/mio_android_kitchen_group)
-### TG 频道: [Mio Android Kitchen Updates](https://t.me/mio_android_kitchen)
+### Telegram 群: [Mio Android Kitchen Chat](https://t.me/mio_android_kitchen_group)
+### Telegram 频道: [Mio Android Kitchen Updates](https://t.me/mio_android_kitchen)
 ***
 # 贡献者:
 ***
@@ -81,7 +78,7 @@ python build.py
 ### 日本语翻译者: [reindex-ot](https://github.com/reindex-ot)
 ### 巴西葡萄牙语翻译者: [igor](https://github.com/igormiguell)
 ### 和更多...
-### 感谢你们的帮助!!
+### 感谢你们的帮助!
 ***
 # 关于
 ***
@@ -91,4 +88,4 @@ python build.py
 好工具，在这里!
 由 MIO-KITCHEN 团队开发
 ```
-#### ColdWindScholar(3590361911@qq.com) 保留所有权利. ####
+#### ColdWindScholar (3590361911@qq.com) 保留所有权利. ####

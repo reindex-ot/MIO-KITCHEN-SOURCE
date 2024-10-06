@@ -1,0 +1,3 @@
+#/system/bin/sh
+# a dtc for android
+dtc $@

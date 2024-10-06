@@ -11,8 +11,8 @@
 ### Portugiesisch (Brasilien): [pt-BR](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_pt-BR.md)
 ***
 ## Eigenschaften
-* Entpacken Sie Boot, dtbo, ext4, erofs, Payload, Logo und so weiter
-* Packen Sie Boot, dtbo, ext4, erofs, Payload, Logo und so weiter
+* Entpacken Sie `Boot, dtbo, ext4, erofs, Payload, Logo` und so weiter
+* Packen Sie `Boot, dtbo, ext4, erofs, Payload, Logo` und so weiter
 ***
 ## Vorteile
 * CONTEXT automatisch reparieren
@@ -23,13 +23,7 @@
 * Unterstützt die Installation von ROMs unter Android 8 und Paketierung als IMG
 * Verwenden Sie die mkc-Datei, wählen Sie die API unter Linux, verwenden Sie sie einfach
 ***
-## * macOS-Hinweis
-``` shell
-# Wenn Sie [Brotli] verwenden möchten, benötigen Sie:
-# Ihr System hatte es möglicherweise bereits, also überprüfen Sie es zuerst
-# 
-brew install gettext
-```
+
 ## Beginnen Sie mit der Verwendung
 ### Notwendige Vorbereitung
 <details><summary>macOS</summary>
@@ -84,7 +78,7 @@ python build.py
 ### Portugiesisch (Brasilien) Übersetzer: [igor](https://github.com/igormiguell)
 ### Deutscher Übersetzer: [keldrion](https://github.com/keldrion)
 ### Und MEHR...
-### Danke für deine Hilfe!!
+### Danke für deine Hilfe!
 ***
 # Über uns
 ***
@@ -94,4 +88,4 @@ Für immer kostenlos, der Benutzer zuerst
 Gute Werkzeuge, hier drin!
 Geschrieben von MIO-KITCHEN-TEAM
 ```
-#### ColdWindScholar(3590361911@qq.com) Alle Rechte Vorbehalten. ####
+#### ColdWindScholar (3590361911@qq.com) Alle Rechte Vorbehalten. ####
