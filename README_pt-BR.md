@@ -1,5 +1,5 @@
 # MIO-KITCHEN-SOURCE #
-![Banner](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/a9bcfdf613ad28e82f7899e3d420d76ecfea174c/splash.png)
+![Banner](/splash.png)
 #### Uma ferramenta ROM escrita em Python
 > [!CAUTION]
 > Proibido o uso comercial não autorizado
@@ -7,10 +7,10 @@
 ## Esta ferramenta usa muitos projetos de código aberto. Preste homenagem aos desenvolvedores!
 ***
 ## Localização
-### 日本語: [ja-JP](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_ja-JP.md)
-### 中文: [zh-CN](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_zh-CN.md)
-### English: [en-US](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README.md)
-### Deutsch: [de-DE](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_de-DE.md)
+### 日本語: [ja-JP](/README_ja-JP.md)
+### 中文: [zh-CN](/README_zh-CN.md)
+### English: [en-US](/README.md)
+### Deutsch: [de-DE](/README_de-DE.md)
 ***
 ## Características
 * Desempacote o `boot, dtbo, ext4, erofs, payload, logo` e assim por diante.
