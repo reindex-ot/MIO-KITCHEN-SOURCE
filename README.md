@@ -1,5 +1,5 @@
 # MIO-KITCHEN-SOURCE #
-![Banner](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/a9bcfdf613ad28e82f7899e3d420d76ecfea174c/splash.png)
+![Banner](/splash.png)
 #### A Rom Tool Written in Python
 > [!CAUTION]
 > Unauthorized commercial use prohibited
