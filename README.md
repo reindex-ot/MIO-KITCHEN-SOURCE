@@ -10,7 +10,7 @@
 ## This tool uses many open source projects. Huge shout out to the developers!
 ***
 ## Localization
-### [日本語](/README_ja-JP.md) | [中文](/README_zh-CN.md) | [Português brasileiro](/README_pt-BR.md) | [Deutsch](/README_de-DE.md) | [Русский язык](/README_ru-RU.md) | [Indonesian](/README_id-ID.md) | [Tiếng Việt](/README_vi-VN.md)
+### [日本語](/README_ja-JP.md) | [中文](/README_zh-CN.md) | [Português brasileiro](/README_pt-BR.md) | [Deutsch](/README_de-DE.md) | [Русский язык](/README_ru-RU.md)
 ***
 ## Features
 * Unpack `boot, dtbo, ext4, erofs, payload, logo` and so on
