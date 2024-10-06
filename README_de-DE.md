@@ -1,14 +1,14 @@
 # MIO-KITCHEN-SOURCE #
-![Banner](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/a9bcfdf613ad28e82f7899e3d420d76ecfea174c/splash.png)
+![Banner](/splash.png)
 #### Das in Python geschriebene Rom-Tool
 ***
 ## Dieses Tool verwendet viele Open-Source-Projekte. Tribut an die Entwickler!
 ***
 ## Localization
-### Japanisch: [ja-JP](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_ja-JP.md)
-### Chinesisch: [zh-CN](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_zh-CN.md)
-### Englisch: [en-US](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README.md)
-### Portugiesisch (Brasilien): [pt-BR](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_pt-BR.md)
+### Japanisch: [ja-JP](/README_ja-JP.md)
+### Chinesisch: [zh-CN](/README_zh-CN.md)
+### Englisch: [en-US](/README.md)
+### Portugiesisch (Brasilien): [pt-BR](/README_pt-BR.md)
 ***
 ## Eigenschaften
 * Entpacken Sie `Boot, dtbo, ext4, erofs, Payload, Logo` und so weiter
