@@ -5,10 +5,10 @@
 ## このツールは多くのオープンソースプロジェクトを使用しています。開発者に敬意を表します!
 ***
 ## Localization
-### Chinese: [zh-CN](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_zh-CN.md)
-### English: [en-US](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README.md)
-### Portuguese (Brazil): [pt-BR](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_pt-BR.md)
-### German: [de-DE](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_de-DE.md)
+### Chinese: [zh-CN](/README_zh-CN.md)
+### English: [en-US](/README.md)
+### Portuguese (Brazil): [pt-BR](/README_pt-BR.md)
+### German: [de-DE](/README_de-DE.md)
 ***
 ## 機能
 * `boot、dtbo、ext4、erofs、payload、logo`などをアンパック
