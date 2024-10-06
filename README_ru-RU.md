@@ -1,5 +1,5 @@
 # MIO-KITCHEN-SOURCE #
-![Баннер](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/a9bcfdf613ad28e82f7899e3d420d76ecfea174c/splash.png)
+![Баннер](/splash.png)
 #### Программа для работы с прошивками, написанная на Python
 > [!ВНИМАНИЕ!]
 > Незаконное коммерческое использование запрещено
@@ -7,7 +7,7 @@
 ## Эта программа используется во многих проектах с открытым исходным кодом. Огромное спасибо разработчикам!
 ***
 ## Локализация
-### [Японский](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_ja-JP.md) | [Китайский](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_zh-CN.md) | [Португальский (Бразилия)](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_pt-BR.md) | [Немецкий](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_de-DE.md) | [Русский](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/main/README_ru-RU.md)
+### [Японский](/README_ja-JP.md) | [Китайский](/README_zh-CN.md) | [Португальский (Бразилия)](/README_pt-BR.md) | [Немецкий](/README_de-DE.md) | [Русский](/README_ru-RU.md)
 ***
 ## Возможности программы:
 * Распаковка `boot, dtbo, ext4, erofs, payload, logo` и так далее
