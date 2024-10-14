@@ -1,6 +1,9 @@
 > [!IMPORTANT]
 > We Are Rewriting The Project.This project has currently stopped updating!
-> But we will still accept bug fixes and pull requests 
+> But we will still accept bug fixes and pull requests
+
+> [!NOTE]
+> This Repository is Mirror.(UnOfficial)
 # MIO-KITCHEN-SOURCE #
 ![Banner](/splash.png)
 #### A Rom Tool Written in Python
