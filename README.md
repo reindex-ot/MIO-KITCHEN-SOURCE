@@ -3,7 +3,7 @@
 > But we will still accept bug fixes and pull requests
 
 > [!NOTE]
-> This Repository is Mirror.(UnOfficial)
+> This Repository is Mirror. (Unofficial)
 # MIO-KITCHEN-SOURCE #
 ![Banner](/splash.png)
 #### A Rom Tool Written in Python
